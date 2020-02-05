@@ -3,7 +3,7 @@ Ready to use youtube-dl package (minus ffmpeg)
 
 Standalone ready-to-use package of [youtube-dl](https://github.com/ytdl-org/youtube-dl)
 
-You must also download [FFMPEG](https://www.ffmpeg.org/download.html) and add the PATH environment variable with the BIN folder (not the TRASH folder)
+You must also download [FFMPEG](https://www.ffmpeg.org/download.html) and add the BIN folder (not the TRASH folder) to the PATH environment variable
 
 Some nice FFMPEG tips [protrolium](https://gist.github.com/protrolium/e0dbd4bb0f1a396fcb55) or [sebsauvage](https://sebsauvage.net/wiki/doku.php?id=ffmpeg)
 
@@ -22,8 +22,8 @@ Some nice FFMPEG tips [protrolium](https://gist.github.com/protrolium/e0dbd4bb0f
   - Run 'youtube-dl_update.bat' when not downloading anything, wait a bit
   - Run 'youtube-dl_help.bat' to get an updated help file
 
-When downloading files, you get their description informations in a separate file
-When downloading MP3 files, you get their thumbnail and subtitles as well
-When downloading MP4 files, you just get their subtitles
+When downloading files, you get their description informations in a separate file<br>
+When downloading MP3 files, you get their thumbnail and subtitles as well<br>
+When downloading MP4 files, you just get their subtitles<br>
 
 If MP4 files are present, their are resumed (if unifinished) but not overwritten
