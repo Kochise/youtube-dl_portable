@@ -1,4 +1,4 @@
-Usage: youtube-dl.exe [OPTIONS] URL [URL...]
+Usage: youtube-dl [OPTIONS] URL [URL...]
 
 Options:
   General Options:
