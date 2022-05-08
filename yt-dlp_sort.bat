@@ -13,27 +13,32 @@ set "quiet=1>nul 2>nul"
 set "fquiet=/f /q 1>nul 2>nul"
 
 dir "*.mp4" %vdir% >".vdir.txt"
+dir "*.mkv" %vdir% >>".vdir.txt"
 dir "*.webm" %vdir% >>".vdir.txt"
 
-if exist ".vdir.txt" for /f "delims=!" %%i in (.vdir.txt) do (
-	set "vcmd=$[NAME]"
-	call :adaptvcmd "yt-dlp" "%%i" "" "" "" "" && set "vnam=!pcmd!"
-	set "vinc=!vnam:~-11!"
-	
-	for /f "tokens=1* delims=:" %%j in ('yt-dlp --print "%%(channel)s" "!vurl!!vinc!"') do (
-		if errorlevel 0 (
-			echo !vinc! - "%%j"
-			mkdir "!vdst!%%j" 2>nul
-			set "vcmd=$[PATH]$[NAME]"
-			call :adaptvcmd "yt-dlp" "%%i" "" "" "" "" && set "vnam=!pcmd!"
-			dir "!vnam!.*" %vdir% >".vlst.txt"
-			if exist ".vlst.txt" for /f "delims=!" %%k in (.vlst.txt) do (
-				move /y "%%k" "!vdst!%%j" %quiet%
+if exist ".vdir.txt" (
+	for /f "delims=|" %%i in (.vdir.txt) do (
+		set "vcmd=$[NAME]"
+		call :adaptvcmd "yt-dlp" "%%i" "" "" "" "" && set "vnam=!pcmd!"
+		set "vinc=!vnam:~-11!"
+		
+		for /f "tokens=1* delims=|" %%j in ('yt-dlp --print "%%(channel)s" "!vurl!!vinc!"') do (
+			if errorlevel 0 (
+				echo !vinc! - "%%j"
+				mkdir "!vdst!%%j" 2>nul
+				dir "*!vinc!*" %vdir% >".vlst.txt"
+				if exist ".vlst.txt" (
+					for /f "delims=|" %%k in (.vlst.txt) do (
+						move /y "%%k" "!vdst!%%j" %quiet%
+					)
+					del ".vlst.txt" %fquiet%
+				)
+			) else (
+				echo ERROR
 			)
-		) else (
-			echo ERROR
 		)
 	)
+	del ".vdir.txt" %fquiet%
 )
 
 chcp %cp%>nul
