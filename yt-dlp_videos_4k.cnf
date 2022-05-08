@@ -1,0 +1,1 @@
+--ignore-errors --continue --no-hls-use-mpegts --no-overwrites --no-progress --no-mark-watched --sub-langs all --sub-format "srt/best" --write-description --write-thumbnail --download-archive youtube-dl_done.txt --batch-file youtube-dl_videos_4k.txt -o %(title)s-%(id)s.%(ext)s

@@ -2,7 +2,8 @@
 
 rem ffmpeg -i "%~1" -vf "transpose=2" -c:a copy "%~dpn1_cw%~x1"
 rem ffmpeg -i "%~1" -vf "vflip,hflip,vflip,hflip" -c:a copy "%~dpn1_cw%~x1"
-ffmpeg -i "%~1" -vf "transpose=clock" -crf 18 -c:a copy "%~dpn1_cw%~x1"
+rem ffmpeg -i "%~1" -vf "transpose=clock" -crf 18 -c:a copy "%~dpn1_cw%~x1"
+ffmpeg -i "%~1" -vf "transpose=clock" -b:v 2M -c:a copy "%~dpn1_cw%~x1"
 rem ffmpeg -i "%~1" -vf "transpose=clock,transpose=clock" -crf 18 -c:a copy "%~dpn1_cw%~x1"
 rem ffmpeg -i "%~1" -vf "transpose=clock,transpose=clock" -b:v 10M -c:a copy "%~dpn1_cw%~x1"
 rem ffmpeg -i "%~1" -c copy -metadata:s:v:0 rotate=90 "%~dpn1_cw%~x1"

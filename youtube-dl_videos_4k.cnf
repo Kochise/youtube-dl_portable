@@ -1,0 +1,1 @@
+--ignore-errors --continue --hls-prefer-native --no-overwrites --no-progress --no-mark-watched --no-call-home --all-subs --sub-format "srt/best" --write-description --write-thumbnail --download-archive youtube-dl_done.txt --batch-file youtube-dl_videos_4k.txt
