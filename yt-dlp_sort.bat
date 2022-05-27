@@ -7,23 +7,29 @@ chcp 1252>nul
 rem %~dpnx0 youtube
 set "cdir=/B /A:-D /ON /S"
 set "cdst=..\_CHAN\"
+set "cfil=.cdir.txt"
 set "curl=https://www.youtube.com/watch?v="
 set "cerr=ERROR: [youtube]"
 
 set "quiet=1>nul 2>nul"
 set "fquiet=/f /q 1>nul 2>nul"
 
-dir "*.mp4" %cdir% >".cdir.txt"
-dir "*.mkv" %cdir% >>".cdir.txt"
-dir "*.webm" %cdir% >>".cdir.txt"
-dir "*.jpg" %cdir% >>".cdir.txt"
-dir "*.webp" %cdir% >>".cdir.txt"
-dir "*.description" %cdir% >>".cdir.txt"
+del "%cfil%" %fquiet%
 
-if exist ".cdir.txt" (
-	for /f "delims=|" %%i in (.cdir.txt) do (
+call :listext "mp3" "%cfil%"
+call :listext "mp4" "%cfil%"
+call :listext "mkv" "%cfil%"
+call :listext "webm" "%cfil%"
+call :listext "jpg" "%cfil%"
+call :listext "webp" "%cfil%"
+call :listext "description" "%cfil%"
+
+call :sortmerge "%cfil%"
+
+if exist "%cfil%" (
+	for /f "delims=" %%i in (.cdir.txt) do (
 		set "vcmd=$[NAME]"
-		call :adaptvcmd "yt-dlp" "%%i" "" "" "" ""
+		call :adaptvcmd "yt-dlp" "%%i.ext" "" "" "" ""
 		set "vinc=!pcmd:_snapshot_=!"
 		if "!vinc!"=="!pcmd!" (
 			set "vinc=!pcmd:~-11!"
@@ -35,20 +41,20 @@ if exist ".cdir.txt" (
 		yt-dlp --print "%%(channel)s" "%curl%!vinc!" 1>.vout.txt 2>.verr.txt
 
 		if exist ".vout.txt" (
-			for /f "tokens=1* delims=|" %%j in (.vout.txt) do (
+			for /f "tokens=1* delims=" %%j in (.vout.txt) do (
 				set "vstr=%%j"
 				call :cleanstr
 				echo !vinc! - "!pstr!"
 				mkdir "%cdst%!pstr!" 2>nul
 				set "vcmd=$[PATH]"
-				call :adaptvcmd "yt-dlp" "%%i" "" "" "" ""
+				call :adaptvcmd "yt-dlp" "%%i.ext" "" "" "" ""
 				move /y "!pcmd!*!vinc!*" "%cdst%!pstr!" %quiet%
 			)
-			del .vout.txt %fquiet%
+			del ".vout.txt" %fquiet%
 		)
 		
 		if exist ".verr.txt" (
-			for /f "tokens=1* delims=|" %%j in (.verr.txt) do (
+			for /f "tokens=1* delims=" %%j in (.verr.txt) do (
 				set "verr=%%j"
 				set "vtmp=!verr:~0,16!
 				if "!vtmp!"=="%cerr%" (
@@ -57,14 +63,14 @@ if exist ".cdir.txt" (
 					echo !vinc! x "!pstr!"
 					mkdir "%cdst%_!pstr!" 2>nul
 					set "vcmd=$[PATH]"
-					call :adaptvcmd "yt-dlp" "%%i" "" "" "" ""
+					call :adaptvcmd "yt-dlp" "%%i.ext" "" "" "" ""
 					move /y "!pcmd!*!vinc!*" "%cdst%_!pstr!" %quiet%
 				)
 			)
-			del .verr.txt %fquiet%
+			del ".verr.txt" %fquiet%
 		)
 	)
-	del ".cdir.txt" %fquiet%
+	del "%cfil%" %fquiet%
 )
 
 chcp %cp%>nul
@@ -73,12 +79,33 @@ goto :eof
 
 rem - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+:listext
+	for /f "delims=" %%a in ('dir %cdir% "*.%~1"') do echo %%~dpna>>"%~2"
+goto :eof
+
+:sortmerge
+	if not "%~1"=="" if exist "%~1" (
+		sort "%~1">"%~1.sorted"
+		if exist "%~1.sorted" (
+			del "%~1" %fquiet%
+			for /f "delims=" %%a in (%~1.sorted) do (
+				if not "!vdup!"=="%%a" (
+					set "vdup=%%a"
+					echo:%%a>>"%~1"
+				)
+			)
+			del "%~1.sorted" %fquiet%
+		)
+	)
+goto :eof
+
 :cleanstr
 	set "pstr=!vstr!"
 	set "pstr=!pstr::=-!"
 	set "pstr=!pstr:/=-!"
 	set "pstr=!pstr:^*=-!"
 	set "pstr=!pstr:?=_!"
+	set "pstr=!pstr:|=_!"
 	set "pstr=!pstr:Ã=A!"
 	set "pstr=!pstr:ï=i!"
 	rem echo pstr="!pstr!"
