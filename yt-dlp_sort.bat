@@ -24,18 +24,25 @@ if exist ".cdir.txt" (
 	for /f "delims=|" %%i in (.cdir.txt) do (
 		set "vcmd=$[NAME]"
 		call :adaptvcmd "yt-dlp" "%%i" "" "" "" ""
-		set "vinc=!pcmd:~-11!"
-		rem echo Checking "!vinc!"...
+		set "vinc=!pcmd:_snapshot_=!"
+		if "!vinc!"=="!pcmd!" (
+			set "vinc=!pcmd:~-11!"
+		) else (
+			set "vinc=!pcmd:~-34,11!"
+		)
 
+		rem echo Checking "!vinc!"...
 		yt-dlp --print "%%(channel)s" "%curl%!vinc!" 1>.vout.txt 2>.verr.txt
 
 		if exist ".vout.txt" (
 			for /f "tokens=1* delims=|" %%j in (.vout.txt) do (
-				echo !vinc! - "%%j"
-				mkdir "%cdst%%%j" 2>nul
+				set "vstr=%%j"
+				call :cleanstr
+				echo !vinc! - "!pstr!"
+				mkdir "%cdst%!pstr!" 2>nul
 				set "vcmd=$[PATH]"
 				call :adaptvcmd "yt-dlp" "%%i" "" "" "" ""
-				move /y "!pcmd!*!vinc!*" "%cdst%%%j" %quiet%
+				move /y "!pcmd!*!vinc!*" "%cdst%!pstr!" %quiet%
 			)
 			del .vout.txt %fquiet%
 		)
@@ -45,12 +52,13 @@ if exist ".cdir.txt" (
 				set "verr=%%j"
 				set "vtmp=!verr:~0,16!
 				if "!vtmp!"=="%cerr%" (
-					set "vtmp=!verr:~30!
-					echo !vinc! x "!vtmp!"
-					mkdir "_%cdst%!vtmp!" 2>nul
+					set "vstr=!verr:~30!
+					call :cleanstr
+					echo !vinc! x "!pstr!"
+					mkdir "%cdst%_!pstr!" 2>nul
 					set "vcmd=$[PATH]"
 					call :adaptvcmd "yt-dlp" "%%i" "" "" "" ""
-					move /y "!pcmd!*!vinc!*" "_%cdst%!vtmp!" %quiet%
+					move /y "!pcmd!*!vinc!*" "%cdst%_!pstr!" %quiet%
 				)
 			)
 			del .verr.txt %fquiet%
@@ -64,6 +72,17 @@ chcp %cp%>nul
 goto :eof
 
 rem - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+:cleanstr
+	set "pstr=!vstr!"
+	set "pstr=!pstr::=-!"
+	set "pstr=!pstr:/=-!"
+	set "pstr=!pstr:^*=-!"
+	set "pstr=!pstr:?=_!"
+	set "pstr=!pstr:Ã=A!"
+	set "pstr=!pstr:ï=i!"
+	rem echo pstr="!pstr!"
+goto :eof
 
 :adaptvcmd
 	rem Replace defined tags with parameters
