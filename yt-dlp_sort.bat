@@ -5,40 +5,58 @@ for /f "tokens=2 delims=:." %%x in ('chcp') do set cp=%%x
 chcp 1252>nul
 
 rem %~dpnx0 youtube
-set "vdir=/B /A:-D /ON /S"
-set "vdst=..\_CHAN\"
-set "vurl=https://www.youtube.com/watch?v="
+set "cdir=/B /A:-D /ON /S"
+set "cdst=..\_CHAN\"
+set "curl=https://www.youtube.com/watch?v="
+set "cerr=ERROR: [youtube]"
 
 set "quiet=1>nul 2>nul"
 set "fquiet=/f /q 1>nul 2>nul"
 
-dir "*.mp4" %vdir% >".vdir.txt"
-dir "*.mkv" %vdir% >>".vdir.txt"
-dir "*.webm" %vdir% >>".vdir.txt"
+dir "*.mp4" %cdir% >".cdir.txt"
+dir "*.mkv" %cdir% >>".cdir.txt"
+dir "*.webm" %cdir% >>".cdir.txt"
+dir "*.jpg" %cdir% >>".cdir.txt"
+dir "*.webp" %cdir% >>".cdir.txt"
+dir "*.description" %cdir% >>".cdir.txt"
 
-if exist ".vdir.txt" (
-	for /f "delims=|" %%i in (.vdir.txt) do (
+if exist ".cdir.txt" (
+	for /f "delims=|" %%i in (.cdir.txt) do (
 		set "vcmd=$[NAME]"
-		call :adaptvcmd "yt-dlp" "%%i" "" "" "" "" && set "vnam=!pcmd!"
-		set "vinc=!vnam:~-11!"
-		
-		for /f "tokens=1* delims=|" %%j in ('yt-dlp --print "%%(channel)s" "!vurl!!vinc!"') do (
-			if errorlevel 0 (
+		call :adaptvcmd "yt-dlp" "%%i" "" "" "" ""
+		set "vinc=!pcmd:~-11!"
+		rem echo Checking "!vinc!"...
+
+		yt-dlp --print "%%(channel)s" "%curl%!vinc!" 1>.vout.txt 2>.verr.txt
+
+		if exist ".vout.txt" (
+			for /f "tokens=1* delims=|" %%j in (.vout.txt) do (
 				echo !vinc! - "%%j"
-				mkdir "!vdst!%%j" 2>nul
-				dir "*!vinc!*" %vdir% >".vlst.txt"
-				if exist ".vlst.txt" (
-					for /f "delims=|" %%k in (.vlst.txt) do (
-						move /y "%%k" "!vdst!%%j" %quiet%
-					)
-					del ".vlst.txt" %fquiet%
-				)
-			) else (
-				echo ERROR
+				mkdir "%cdst%%%j" 2>nul
+				set "vcmd=$[PATH]"
+				call :adaptvcmd "yt-dlp" "%%i" "" "" "" ""
+				move /y "!pcmd!*!vinc!*" "%cdst%%%j" %quiet%
 			)
+			del .vout.txt %fquiet%
+		)
+		
+		if exist ".verr.txt" (
+			for /f "tokens=1* delims=|" %%j in (.verr.txt) do (
+				set "verr=%%j"
+				set "vtmp=!verr:~0,16!
+				if "!vtmp!"=="%cerr%" (
+					set "vtmp=!verr:~30!
+					echo !vinc! x "!vtmp!"
+					mkdir "_%cdst%!vtmp!" 2>nul
+					set "vcmd=$[PATH]"
+					call :adaptvcmd "yt-dlp" "%%i" "" "" "" ""
+					move /y "!pcmd!*!vinc!*" "_%cdst%!vtmp!" %quiet%
+				)
+			)
+			del .verr.txt %fquiet%
 		)
 	)
-	del ".vdir.txt" %fquiet%
+	del ".cdir.txt" %fquiet%
 )
 
 chcp %cp%>nul
