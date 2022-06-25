@@ -1,4 +1,4 @@
 @echo off
 setlocal enableExtensions disableDelayedExpansion
 
-ffmpeg -i "%~1" -y -vn -acodec copy "%~dpn1-audio.ac3"
+"%~dp0ffmpeg" -i "%~1" -y -vn -acodec copy "%~dpn1-audio.ac3"
