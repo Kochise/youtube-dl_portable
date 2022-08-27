@@ -2,7 +2,7 @@
 setlocal enabledelayedexpansion
 
 for /f "tokens=2 delims=:." %%x in ('chcp') do set cp=%%x
-chcp 1252>nul
+chcp 65001>nul
 
 rem %~dpnx0 youtube
 set "cdir=/B /A:-D /ON /S"
@@ -23,6 +23,7 @@ call :listext "webm" "%cfil%"
 call :listext "jpg" "%cfil%"
 call :listext "webp" "%cfil%"
 call :listext "description" "%cfil%"
+call :listext "txt" "%cfil%"
 
 call :sortmerge "%cfil%"
 
