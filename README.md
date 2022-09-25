@@ -1,7 +1,9 @@
 # youtube-dl_portable
 Ready to use **youtube-dl** package (minus **FFmpeg**)
 
-Standalone ready-to-use package of [youtube-dl](https://github.com/ytdl-org/youtube-dl)
+Standalone ready-to-use package of :<br>
+* [youtube-dl](https://github.com/ytdl-org/youtube-dl)<br>
+* [yt-dlp](https://github.com/yt-dlp/yt-dlp)<br>
 
 You must also download [FFmpeg](https://www.ffmpeg.org/download.html) and add the **BIN** folder (not the **TRASH** folder) to the **PATH** environment variable
 
