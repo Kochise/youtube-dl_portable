@@ -1,8 +1,4 @@
-@echo off
-setlocal enabledelayedexpansion
-
-for /f "tokens=2 delims=:." %%x in ('chcp') do set cp=%%x
-chcp 65001>nul
+@echo off && setlocal enabledelayedexpansion && chcp 65001>nul
 
 rem %~dpnx0 youtube
 set "cdir=/B /A:-D /ON /S"
@@ -16,6 +12,7 @@ set "fquiet=/f /q 1>nul 2>nul"
 
 del "%cfil%" %fquiet%
 
+rem List extension
 call :listext "mp3" "%cfil%"
 call :listext "mp4" "%cfil%"
 call :listext "mkv" "%cfil%"
@@ -25,6 +22,7 @@ call :listext "webp" "%cfil%"
 call :listext "description" "%cfil%"
 call :listext "txt" "%cfil%"
 
+rem Merge duplicate files
 call :sortmerge "%cfil%"
 
 if exist "%cfil%" (
@@ -74,8 +72,6 @@ if exist "%cfil%" (
 	del "%cfil%" %fquiet%
 )
 
-chcp %cp%>nul
-
 goto :eof
 
 rem - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -85,14 +81,30 @@ rem - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 goto :eof
 
 :sortmerge
+	rem Merge list
 	if not "%~1"=="" if exist "%~1" (
 		sort "%~1">"%~1.sorted"
 		if exist "%~1.sorted" (
 			del "%~1" %fquiet%
 			for /f "delims=" %%a in (%~1.sorted) do (
-				if not "!vdup!"=="%%a" (
-					set "vdup=%%a"
-					echo:%%a>>"%~1"
+				REM echo   a=%%a
+				rem Get file name
+				set "vcmd=$[NAME]"
+				rem Add fake extension to keep (last) real extension
+				call :adaptvcmd "yt-dlp" "%%a.ext" "" "" "" ""
+				rem Check if "_snapshot_"
+				set "vinc=!pcmd:_snapshot_=!"
+				if not "!vinc!"=="!pcmd!" (
+					set "vinc=%%a"
+					set "vinc=!vinc:~0,-22!"
+					rem Add fake extension for it to work
+					call :adaptvcmd "yt-dlp" "!vinc!" "" "" "" ""
+					set "vinc=!pcmd!"
+				)
+				REM echo   vinc=!vinc!
+				if not "!vdup!"=="!vinc!" (
+					set "vdup=!vinc!"
+					echo:!vinc!>>"%~1"
 				)
 			)
 			del "%~1.sorted" %fquiet%
