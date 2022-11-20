@@ -14,5 +14,10 @@ if defined PATH_FULL goto :loop
 rem If no last folder found (ie 'root') use batch's name
 if not defined PATH_LAST set "PATH_LAST=%~n0"
 
+set "PLAYLIST=_%PATH_LAST%.m3u"
+
 rem Create playlist based on name (should be checked with source though)
-dir /o:n /b *.m4a>"%PATH_LAST%.m3u"
+dir /o:n /b *.m4a>"%PLAYLIST%"
+
+echo;>>"%PLAYLIST%"
+echo ___playlist_end___>>"%PLAYLIST%"
