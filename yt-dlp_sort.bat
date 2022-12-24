@@ -70,13 +70,14 @@ REM			set "vcmd=$[PATH]"
 REM			call :adaptvcmd "yt-dlp" "%%i.ext" "" "" "" ""
 			move /y "*!vinc!*" "%cdst%!pstr!" %quiet%
 			del ".vout.txt" %fquiet%
+			set "vstr="
 		)
 
 		:: When the video has been striked
 		if exist ".verr.txt" (
 			set /p verr= <.verr.txt
 REM			echo verr = "!verr!"
-			:: Extract ereor header
+			:: Extract error header
 			set "vtmp=!verr:~0,16!
 			if "!vtmp!"=="%cerr%" (
 				set "vstr=!verr:~30!
@@ -91,6 +92,7 @@ REM				call :adaptvcmd "yt-dlp" "%%i.ext" "" "" "" ""
 				move /y "*!vinc!*" "%cdst%_!pstr!" %quiet%
 			)
 			del ".verr.txt" %fquiet%
+			set "verr="
 		)
 
 		:: Return in UTF-8 for the file list
