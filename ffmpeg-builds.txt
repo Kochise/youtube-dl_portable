@@ -1,0 +1,5 @@
+https://www.ffmpeg.org/download.html
+https://www.gyan.dev/ffmpeg/builds/
+
+https://www.gyan.dev/ffmpeg/builds/
+https://github.com/BtbN/FFmpeg-Builds/releases
