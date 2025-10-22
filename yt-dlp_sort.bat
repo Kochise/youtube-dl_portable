@@ -8,15 +8,35 @@ chcp 65001>nul
 
 rem %~dpnx0 youtube
 set "cdir=/B /A:-D /ON"
-set "cdst=..\_CHAN\"
+set "cdst=..\_CHAN_SORTED\"
 set "cfil=.cdir.txt"
 set "curl=https://www.youtube.com/watch?v="
 set "cerr=ERROR: [youtube]"
+
+	set "carg="
+	set "carg=%carg% --cookies-from-browser firefox"
+	set "carg=%carg% --no-download"
+	set "carg=%carg% --print-to-file"
+rem	set "carg=%carg% --rm-cache"
+
+echo carg=%carg%
+
+set "sout=.yt-dlp_stdout.txt"
+set "scon=.yt-dlp_stdcon.txt"
+set "serr=.yt-dlp_stderr.txt"
+
+set "vout=.vout.txt"
+set "vcon=.vcon.txt"
+set "verr=.verr.txt"
 
 set "quiet=1>nul 2>nul"
 set "fquiet=/f /q 1>nul 2>nul"
 
 del "%cfil%" %fquiet%
+
+del "%sout%" %fquiet%
+del "%scon%" %fquiet%
+del "%serr%" %fquiet%
 
 REM	cmd /d /a /c (set/p=ÿþ)<nul >"%cfil%" 2>nul
 REM	cmd /d /u /c type "%cfil%" >>"%cfil%"
@@ -53,14 +73,17 @@ REM		echo vinc=!vinc!
 		set "vinc=!vinc:~-11!"
 
 REM		echo Checking video ID : !vinc!
-		yt-dlp --no-download --print-to-file "%%(channel)s" ".vout.txt" "%curl%!vinc!" 1>.vcon.txt 2>.verr.txt
+		yt-dlp %carg% "%%(channel)s" "%vout%" "%curl%!vinc!" 1>"%vcon%" 2>"%verr%"
 
-		rem Generated ".vout.txt" is in OEM format
+		rem Generated "%vout%" is in OEM format
 REM		chcp 1252>nul
 
+		type "%vcon%">>"%scon%" 
+
 		rem When the video is found
-		if exist ".vout.txt" (
-			set /p vstr= <.vout.txt
+		if exist "%vout%" (
+			type "%vout%">>"%sout%" 
+			set /p vstr= <%vout%
 REM			echo vstr = "!vstr!"
 			call :cleanstr
 			rem Video ID - Channel name
@@ -69,13 +92,14 @@ REM			echo vstr = "!vstr!"
 REM			set "vcmd=$[PATH]"
 REM			call :adaptvcmd "yt-dlp" "%%i.ext" "" "" "" ""
 			move /y "*!vinc!*" "%cdst%!pstr!" %quiet%
-			del ".vout.txt" %fquiet%
+			del "%vout%" %fquiet%
 			set "vstr="
 		)
 
 		rem When the video has been striked
-		if exist ".verr.txt" (
-			set /p verr= <.verr.txt
+		if exist "%verr%" (
+			type "%verr%">>"%serr%" 
+			set /p verr= <"%verr%"
 REM			echo verr = "!verr!"
 			rem Extract error header
 			set "vtmp=!verr:~0,16!
@@ -91,14 +115,14 @@ REM				set "vcmd=$[PATH]"
 REM				call :adaptvcmd "yt-dlp" "%%i.ext" "" "" "" ""
 				move /y "*!vinc!*" "%cdst%_!pstr!" %quiet%
 			)
-			del ".verr.txt" %fquiet%
+			del "%verr%" %fquiet%
 			set "verr="
 		)
 
 		rem Return in UTF-8 for the file list
 REM		chcp 65001>nul
 
-		del ".vcon.txt" %fquiet%
+		del "%vcon%" %fquiet%
 	)
 	del "%cfil%" %fquiet%
 )
@@ -117,6 +141,7 @@ rem - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 			if "%%~xa"==".srt" (
 				set "vcmd=$[LANG]"
 				call :adaptvcmd "yt-dlp" "%%~dpna" "" "" "" ""
+				call :adaptvcmd "yt-dlp" "!pcmd!" "" "" "" ""
 REM				echo srt=!pcmd!
 				echo !pcmd!>>"%~2"
 			) else if "%%~xa"==".vtt" (
@@ -198,9 +223,14 @@ goto :eof
 	set "pcmd=!vcmd!"
 	set "pcmd=!pcmd:$[CONF]=%~1!"
 	set "pcmd=!pcmd:$[THIS]=%~2!"
+	set "pcmd=!pcmd:$[FULL]=%~f2!"
+	set "pcmd=!pcmd:$[DISK]=%~d2!"
+	set "pcmd=!pcmd:$[FOLD]=%~p2!"
 	set "pcmd=!pcmd:$[PATH]=%~dp2!"
+	rem Special identifier to remove language "extension" of subtitles
 	set "pcmd=!pcmd:$[LANG]=%~dpn2!"
 	set "pcmd=!pcmd:$[NAME]=%~n2!"
+	set "pcmd=!pcmd:$[DOSN]=%~s2!"
 	set "pcmd=!pcmd:$[EXT]=%~x2!"
 	set "pcmd=!pcmd:$[FILE]=%~nx2!"
 	set "pcmd=!pcmd:$[ATTR]=%~a2!"
